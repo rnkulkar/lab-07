@@ -19,17 +19,85 @@ library(tidyverse)
 1. Read through the Spotify documentation page to learn more about the variables in the dataset. The response variable for this analysis is target, where 1 indicates the user likes the song and 0 otherwise. Let’s prepare the response and some predictor variables before modeling.
 
   - If needed, change target so that it is factor variable type in R.
+  ```
+  spotify$target <- as.factor(spotify$target)
+  ```
   - Change key so that it is a factor variable type in R, which takes values “D” if key==2, “D#” if     key==3, and “Other” for all other values.
+  ```
+  spotify$key <- as.factor(spotify$key)
+  spotify$key <- fct_recode(spotify$key, "D" = "2", "D#" = "3", "Other" = "0", "Other" = "1",         "Other" = "4", "Other" = "5", "Other" = "6", "Other" = "7", "Other" = "8", "Other" = "9", "Other"     = "10", "Other" = "11",)
+  ```
   - Plot the relationship between target and key. Briefly describe the relationship between the two     variables.
+  ```
+  ggplot(spotify, aes(x=target, fill=key)) + geom_bar()
+  ```
+  ![Key vs. Target](key_vs_target.png)
+  Both 1 and 0 factors for target mostly consist of observations with "Other" as the key value. However, in the 1 column, there is a significantly higher proportion of "D" and lower proportion of "D#" than in the 0 column. 
+  
+  
+2. Fit a logistic regression model with ```target``` as the response variable and the following as predictors: ```acousticness, danceability, duration_ms, instrumentalness, loudness, speechiness, and valence```. Display the model output.
 
-2. Fit a logistic regression model with target as the response variable and the following as predictors: ```acousticness, danceability, duration_ms, instrumentalness, loudness, speechiness, and valence```. Display the model output.
+```
+model <- glm(target ~ acousticness + danceability + duration_ms + instrumentalness 
+            + loudness + speechiness + valence, spotify, family=binomial)
+model
+```
 
-3. We consider adding ```key``` to the model. Conduct the appropriate test to determine if key should be included in the model. Display the output from the test and write your conclusion in the context of the data.
+Output:
+```
+Coefficients:
+     (Intercept)      acousticness      danceability       duration_ms  instrumentalness  
+      -2.955e+00        -1.722e+00         1.630e+00         2.871e-06         1.353e+00  
+        loudness       speechiness           valence  
+      -8.744e-02         4.072e+00         8.564e-01  
+
+Degrees of Freedom: 2016 Total (i.e. Null);  2009 Residual
+Null Deviance:	    2796 
+Residual Deviance: 2519 	AIC: 2535
+```
+
+3. We consider adding ```key``` to the model. Conduct the appropriate test to determine if ```key``` should be included in the model. Display the output from the test and write your conclusion in the context of the data.
     
+```
+anova(model, model_test, test="Chisq")
+```
+I performed a Drop-in-Deviance test with these results:
+
+```
+Analysis of Deviance Table
+
+Model 1: target ~ acousticness + danceability + duration_ms + instrumentalness + 
+    loudness + speechiness + valence
+Model 2: target ~ acousticness + danceability + duration_ms + instrumentalness + 
+    loudness + speechiness + valence + key
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)   
+1      2009     2518.5                        
+2      2007     2505.2  2   13.357 0.001258 **
+```
+The test statistic is 13.357 on 2 degrees of freedom, which produces a p-value of 0.001258. Since the value is less than 0.05, ```key``` will be included in the model.
+
+
 **Use the model you selected in Exercise 3 for the remainder of the lab.**
 
 
 4. Display the model you chose in Exercise 3. If appropriate, interpret the coefficient for ```keyD#``` in the context of the data. Otherwise, state why it’s not appropriate to interpret this coefficient.
+
+```
+summary(model)
+```
+Output:
+```
+Coefficients:
+     (Intercept)      acousticness      danceability       duration_ms  instrumentalness  
+      -3.003e+00        -1.702e+00         1.649e+00         2.863e-06         1.383e+00  
+        loudness       speechiness           valence              keyD             keyD#  
+      -8.662e-02         4.034e+00         8.809e-01         4.939e-01        -5.793e-01  
+
+Degrees of Freedom: 2016 Total (i.e. Null);  2007 Residual
+Null Deviance:	    2796 
+Residual Deviance: 2505 	AIC: 2525
+```
+The coefficient for KeyD# is -0.5793 which means that there is a negative correlation between a song having a key of D# and it being a song that the user "likes" (target == 1). 
 
 
 ## Part II: Checking Assumptions
