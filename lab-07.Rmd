@@ -106,13 +106,39 @@ In the next few questions, we will do an abbreviated analysis of the residuals.
 
 5. Use the ```augment``` function to calculate the predicted probabilities and corresponding      residuals.
 
+```
+spotify_aug <- augment(model, spotify)
+```
+
 6. Create a binned plot of the residuals versus the predicted probabilities.
+
+```
+ggplot(spotify_aug, aes(x=.resid, y=.fitted)) + geom_bin2d()
+
+```
+![Residuals vs. Predicted Probabilities](resid_vs_fitted.png)
 
 7. Choose a quantitative predictor in the final model. Make the appropriate table or plot to examine the residuals versus this predictor variable.
 
+Quantitative predictor: ```danceability```
+
+```
+ggplot(spotify_aug, aes(x=.resid, y=danceability)) + geom_point()
+```
+![Residuals vs Danceability](resid_vs_danceability.png)
+
 8. Choose a categorical predictor in the final model. Make the appropriate table or plot to examine the residuals versus this predictor variable
 
+Categorical Predictor: ```key```
+
+```
+ggplot(spotify_aug, aes(x=key, y=.resid)) + geom_boxplot()
+```
+![Key vs Residuals](key_vs_resid.png)
+
 9. Based on the residuals plots from Exercises 6 - 8, is the linearity assumption satisfied? Briefly explain why or why not.
+
+The linearity assumption is satisfied because the quantitative predictor plot is somewhat random, even thought there is a clear divide into two parts, and the categorical predictor is normal because the means of each type of key are close to 0. 
 
 
 ## Part III: Model Assessment & Prediction
