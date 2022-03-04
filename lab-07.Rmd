@@ -145,16 +145,63 @@ The linearity assumption is satisfied because the quantitative predictor plot is
 
 10. Plot the ROC curve and calculate the area under the curve (AUC). Display at least 5 thresholds (n.cut = 5) on the ROC.
 
+```
+roc_curve <- roc(spotify_aug, target, .fitted, plot=TRUE, xlab="False Positive %",
+                ylab="False Negative %" )
+roc_curve$auc
+```
+Plot:
+![ROC Curve](ROC_curve.png)
+
+AUC:
+```
+Area under the curve: 0.7138
+```
+
+
 11. Based on the ROC curve and AUC in the previous exercise, do you think this model effectively differentiates between the songs the user likes versus those he doesn’t?
+
+Based on the curves, I believe that the model does not effectively differentiate between the songs the user likes versus those they do not because the false positive and false negative rate, even when an optimal threshold is chosen, is around 30-50% which is really just as good as a random guess.
 
 12. You are part of the data science team at Spotify, and your model will be used to make song recommendations to users. The goal is to recommend songs the user has a high probability of liking.
 
-  - Choose a threshold value to distinguish between songs the user will like and those the user         won’t like. What is your threshold value? Use the ROC curve to help justify your choice.
+  - Choose a threshold value to distinguish between songs the user will like and those the user won’t like. What is your threshold value? Use the ROC curve to help justify your choice.
+  
+  Using the following code to calculate the optimal threshold: 
+  ```
+  coords(roc_curve, "best", ret = "threshold")
+  ```
+  I have found that the optimal threshold is 0.2066671, so around 0.2. 
   
 13. Make the confusion matrix using the threshold chosen in the previous question.
 
+```
+spotify_aug <- mutate(spotify_aug, pred = ifelse(.fitted > 0.2066671, 1, 0))
+
+spotify_aug$pred <- as.factor(spotify_aug$pred)
+
+confusionMatrix(spotify_aug$pred, spotify_aug$target)
+```
+
+```
+          Reference
+Prediction   0   1
+         0 790 442
+         1 207 578
+```
+
 14. Use the confusion matrix from the previous question to answer the following:
 
+  These questions were answered using information given by the code in the previous question.
+  
   - What is the proportion of true positives (sensitivity)?
+    
+    0.7924
+    
   - What is the proportion of false positives (1 - specificity)?
+  
+    1 - 0.5667 = 0.4333
+  
   - What is the misclassification rate?
+  
+    1 - 0.6782 = 0.3218
